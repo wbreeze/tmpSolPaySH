@@ -24,7 +24,11 @@ const Navbar = () => {
             Home
           </MenuItem>
           {locations.map((location) => (
-            <MenuItem as={Link} href={`/location/${location.id}`}>
+            <MenuItem
+              as={Link}
+              href={`/location/${location.id}`}
+              key={location.id}
+            >
               Location {location.id}
             </MenuItem>
           ))}

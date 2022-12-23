@@ -185,11 +185,16 @@ function verifyCorrectLocation(
     const lastLocation = locations.find(
       (location) =>
         location.key.toString() === userState!.lastLocation.toString()
-    )!
-    if (currentLocation.id !== lastLocation.id + 1) {
+    )
+    if (lastLocation && currentLocation.id !== lastLocation.id + 1) {
       return {
         transaction: "",
         message: "You're at the wrong location, keep looking!",
+      }
+    } else if (!lastLocation) {
+      return {
+        transaction: "",
+        message: "Unrecognized previous location, where did you go?",
       }
     }
   } else if (currentLocation.id !== 1) {

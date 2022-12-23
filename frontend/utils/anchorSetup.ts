@@ -4,8 +4,11 @@ import {
   Idl,
   setProvider,
 } from "@project-serum/anchor"
+import NodeWallet from "@project-serum/anchor/dist/cjs/nodewallet"
 import { clusterApiUrl, Connection, Keypair, PublicKey } from "@solana/web3.js"
 import { IDL, ScavengerHunt } from "../idl/scavenger_hunt"
+
+let wallet = new NodeWallet(Keypair.generate())
 
 // Create a mock wallet object as placeholder to set up AnchorProvider
 const MockWallet = {
@@ -18,7 +21,7 @@ const MockWallet = {
 export const connection = new Connection(clusterApiUrl("devnet"))
 
 // Create an AnchorProvider instance with the connection and mock wallet
-const provider = new AnchorProvider(connection, MockWallet, {})
+const provider = new AnchorProvider(connection, wallet, {})
 
 // Set the provider as the default provider
 setProvider(provider)
