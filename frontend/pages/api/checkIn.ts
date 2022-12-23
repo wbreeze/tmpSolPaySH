@@ -108,47 +108,18 @@ async function buildTransaction(
     lastValidBlockHeight,
   })
 
-  const [userStatePDA] = findProgramAddressSync(
-    [account.toBuffer()],
-    program.programId
-  )
-
-  let userState: UserState | undefined
-  try {
-    userState = await program.account.userState.fetch(userStatePDA)
-  } catch (e) {
-    const initializeInstruction = await program.methods
-      .initialize()
-      .accounts({ user: account })
-      .instruction()
-    transaction.add(initializeInstruction)
-  }
-
   // Find the current location
   const currentLocation = locations.find(
     (location) => location.id.toString() === id
   )!
 
-  console.log(currentLocation.key.toString())
+  // Fetch the user state or add the `initialize` instruction if necessary
+  const userState = await fetchOrInitializeUserState(transaction, account)
 
-  if (userState) {
-    // If user has checked in at a location, verify that they are checking in at the correct location
-    const lastLocation = locations.find(
-      (location) =>
-        location.key.toString() === userState!.lastLocation.toString()
-    )!
-    if (currentLocation.id !== lastLocation.id + 1) {
-      return {
-        transaction: "",
-        message: "You're at the wrong location, keep looking!",
-      }
-    }
-  } else if (currentLocation.id !== 1) {
-    // If the user has not checked in at a location and is not at the first location, return an error message
-    return {
-      transaction: "",
-      message: "You missed the first location, go back!",
-    }
+  // Verify that the user is at the correct location
+  const errorMessage = verifyCorrectLocation(userState, currentLocation)
+  if (errorMessage) {
+    return errorMessage
   }
 
   // Check in at the current location
@@ -179,5 +150,53 @@ async function buildTransaction(
   return {
     transaction: base64,
     message,
+  }
+}
+
+async function fetchOrInitializeUserState(
+  transaction: Transaction,
+  account: PublicKey
+): Promise<UserState | undefined> {
+  const [userStatePDA] = findProgramAddressSync(
+    [account.toBuffer()],
+    program.programId
+  )
+
+  let userState: UserState | undefined
+  try {
+    userState = await program.account.userState.fetch(userStatePDA)
+  } catch (e) {
+    const initializeInstruction = await program.methods
+      .initialize()
+      .accounts({ user: account })
+      .instruction()
+    transaction.add(initializeInstruction)
+  }
+
+  return userState
+}
+
+function verifyCorrectLocation(
+  userState: UserState | undefined,
+  currentLocation: any
+): PostResponse | undefined {
+  if (userState) {
+    // If user has checked in at a location, verify that they are checking in at the correct location
+    const lastLocation = locations.find(
+      (location) =>
+        location.key.toString() === userState!.lastLocation.toString()
+    )!
+    if (currentLocation.id !== lastLocation.id + 1) {
+      return {
+        transaction: "",
+        message: "You're at the wrong location, keep looking!",
+      }
+    }
+  } else if (currentLocation.id !== 1) {
+    // If the user has not checked in at a location and is not at the first location, return an error message
+    return {
+      transaction: "",
+      message: "You missed the first location, go back!",
+    }
   }
 }
