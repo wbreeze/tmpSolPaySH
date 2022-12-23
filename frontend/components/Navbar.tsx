@@ -9,6 +9,7 @@ import {
 import { HamburgerIcon } from "@chakra-ui/icons"
 import { locations } from "../utils/locations"
 import Link from "next/link"
+
 const Navbar = () => {
   return (
     <Flex px={4} py={4}>
@@ -23,12 +24,8 @@ const Navbar = () => {
             Home
           </MenuItem>
           {locations.map((location) => (
-            <MenuItem
-              as={Link}
-              // href="/scavenger-hunt/[id]"
-              href={`/point/${location.id}`}
-            >
-              Point {location.id}
+            <MenuItem as={Link} href={`/location/${location.id}`}>
+              Location {location.id}
             </MenuItem>
           ))}
         </MenuList>

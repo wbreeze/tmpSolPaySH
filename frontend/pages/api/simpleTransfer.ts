@@ -1,8 +1,5 @@
-import { utils } from "@project-serum/anchor"
 import { NextApiRequest, NextApiResponse } from "next"
 import {
-  clusterApiUrl,
-  Connection,
   Keypair,
   LAMPORTS_PER_SOL,
   PublicKey,
@@ -116,7 +113,7 @@ async function buildTransaction(
   })
   const base64 = serializedTransaction.toString("base64")
 
-  const message = "Message To User Before Approving Transaction Here"
+  const message = "Approve to transfer 0.001 Devnet SOL"
 
   return {
     transaction: base64,

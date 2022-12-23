@@ -5,13 +5,16 @@ import { createQRCode } from "../utils/createQrCode/simpleTransfer"
 import { checkTransaction } from "../utils/checkTransaction"
 
 export default function Home() {
+  // Create a ref to the QR code element and a state variable for the reference
   const qrRef = useRef<HTMLDivElement>(null)
   const [reference, setReference] = useState(Keypair.generate().publicKey)
 
+  // Create the QR code when the `id` parameter or `reference` changes
   useEffect(() => {
     createQRCode(qrRef, reference)
   }, [reference])
 
+  // Periodically check the transaction status and reset the `reference` state variable once confirmed
   useEffect(() => {
     const interval = setInterval(() => {
       checkTransaction(reference, setReference)

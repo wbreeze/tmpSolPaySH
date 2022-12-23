@@ -6,6 +6,12 @@ import { connection, program } from "../../utils/anchorSetup"
 import { IdlAccounts } from "@project-serum/anchor"
 import { locations } from "../../utils/locations"
 
+const eventOrganizer = JSON.parse(process.env.EVENT_ORGANIZER ?? "") as number[]
+if (!eventOrganizer) throw new Error("EVENT_ORGANIZER not found")
+const eventOrganizerKeypair = Keypair.fromSecretKey(
+  Uint8Array.from(eventOrganizer)
+)
+
 type UserState = IdlAccounts<ScavengerHunt>["userState"]
 
 // Public key of wallet scanning QR code
@@ -56,20 +62,21 @@ async function post(
   res: NextApiResponse<PostResponse | PostError>
 ) {
   const { account } = req.body as InputData
+  const { reference } = req.query
+  const { id } = req.query
+
   if (!account) {
     res.status(400).json({ error: "No account provided" })
     return
   }
 
-  const { reference } = req.query
   if (!reference) {
     res.status(400).json({ error: "No reference provided" })
     return
   }
 
-  const { locationKey } = req.query
-  if (!locationKey) {
-    res.status(400).json({ error: "No locationKey provided" })
+  if (!id) {
+    res.status(400).json({ error: "No id provided" })
     return
   }
 
@@ -77,7 +84,7 @@ async function post(
     const postResponse = await buildTransaction(
       new PublicKey(account),
       new PublicKey(reference),
-      new PublicKey(locationKey)
+      id.toString()
     )
     res.status(200).json(postResponse)
     return
@@ -87,22 +94,11 @@ async function post(
   }
 }
 
-// build the transaction
 async function buildTransaction(
   account: PublicKey,
   reference: PublicKey,
-  locationKey: PublicKey
+  id: string
 ): Promise<PostResponse> {
-  let message: string
-
-  const eventOrganizer = JSON.parse(
-    process.env.EVENT_ORGANIZER ?? ""
-  ) as number[]
-  if (!eventOrganizer) throw new Error("EVENT_ORGANIZER not found")
-  const eventOrganizerKeypair = Keypair.fromSecretKey(
-    Uint8Array.from(eventOrganizer)
-  )
-
   const { blockhash, lastValidBlockHeight } =
     await connection.getLatestBlockhash()
 
@@ -112,70 +108,74 @@ async function buildTransaction(
     lastValidBlockHeight,
   })
 
-  const initializeInstruction = await program.methods
-    .initialize()
-    .accounts({ user: account })
-    .instruction()
-
-  const checkInInstruction = await program.methods
-    .checkIn(locationKey)
-    .accounts({
-      user: account,
-      eventOrganizer: eventOrganizerKeypair.publicKey,
-    })
-    .instruction()
-
   const [userStatePDA] = findProgramAddressSync(
     [account.toBuffer()],
     program.programId
   )
 
-  const currentLocation = locations.find(
-    (location) => location.key.toString() === locationKey.toString()
-  )
-
-  // console.log(locations[0].key.toString(), "location 1")
-  // console.log(locations[1].key.toString(), "location 2")
-  // console.log(locations[2].key.toString(), "location 3")
-  // console.log(locationKey.toString(), "locationKey")
-  // console.log(currentLocation)
-
-  let userState: UserState
+  let userState: UserState | undefined
   try {
     userState = await program.account.userState.fetch(userStatePDA)
-    console.log(userState.lastLocation.toString())
-    if (userState) {
-      const lastLocation = locations.find(
-        (location) =>
-          location.key.toString() === userState.lastLocation.toString()
-      )
-
-      if (Number(currentLocation?.id) != Number(lastLocation?.id) + 1) {
-        return {
-          transaction: "",
-          message: "You're at the wrong location, keep looking!",
-        }
-      }
-    }
   } catch (e) {
+    const initializeInstruction = await program.methods
+      .initialize()
+      .accounts({ user: account })
+      .instruction()
     transaction.add(initializeInstruction)
   }
 
+  // Find the current location
+  const currentLocation = locations.find(
+    (location) => location.id.toString() === id
+  )!
+
+  console.log(currentLocation.key.toString())
+
+  if (userState) {
+    // If user has checked in at a location, verify that they are checking in at the correct location
+    const lastLocation = locations.find(
+      (location) =>
+        location.key.toString() === userState!.lastLocation.toString()
+    )!
+    if (currentLocation.id !== lastLocation.id + 1) {
+      return {
+        transaction: "",
+        message: "You're at the wrong location, keep looking!",
+      }
+    }
+  } else if (currentLocation.id !== 1) {
+    // If the user has not checked in at a location and is not at the first location, return an error message
+    return {
+      transaction: "",
+      message: "You missed the first location, go back!",
+    }
+  }
+
+  // Check in at the current location
+  const checkInInstruction = await program.methods
+    .checkIn(currentLocation.key)
+    .accounts({
+      user: account,
+      eventOrganizer: eventOrganizerKeypair.publicKey,
+    })
+    .instruction()
   checkInInstruction.keys.push({
     pubkey: reference,
     isSigner: false,
     isWritable: false,
   })
-
   transaction.add(checkInInstruction)
+
+  // Sign the transaction with the event organizer's keypair
   transaction.partialSign(eventOrganizerKeypair)
 
+  // Serialize the transaction and return it along with a message
   const serializedTransaction = transaction.serialize({
     requireAllSignatures: false,
   })
-  const base64 = serializedTransaction.toString("base64")
-  message = `You've found location ${currentLocation?.id}!`
 
+  const base64 = serializedTransaction.toString("base64")
+  const message = `You've found location ${currentLocation.id}!`
   return {
     transaction: base64,
     message,

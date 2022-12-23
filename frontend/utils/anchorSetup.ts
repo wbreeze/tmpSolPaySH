@@ -7,19 +7,24 @@ import {
 import { clusterApiUrl, Connection, Keypair, PublicKey } from "@solana/web3.js"
 import { IDL, ScavengerHunt } from "../idl/scavenger_hunt"
 
+// Create a mock wallet object as placeholder to set up AnchorProvider
 const MockWallet = {
   signTransaction: () => Promise.reject(),
   signAllTransactions: () => Promise.reject(),
   publicKey: Keypair.generate().publicKey,
 }
 
+// Create a connection to the devnet cluster
 export const connection = new Connection(clusterApiUrl("devnet"))
 
+// Create an AnchorProvider instance with the connection and mock wallet
 const provider = new AnchorProvider(connection, MockWallet, {})
+
+// Set the provider as the default provider
 setProvider(provider)
 
+// Create a program object with the specified program ID
 const programId = new PublicKey("9gQfxMKfELeAjLmAoriLpkVPSHd7xb36cBfYXDXX27xE")
-
 export const program = new Program(
   IDL as Idl,
   programId

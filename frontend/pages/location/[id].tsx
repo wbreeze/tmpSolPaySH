@@ -1,24 +1,27 @@
 import { Flex, Heading, VStack } from "@chakra-ui/react"
 import { useRouter } from "next/router"
-import { locations } from "../../utils/locations"
 import { Keypair } from "@solana/web3.js"
 import { useEffect, useRef, useState } from "react"
 import { createQRCode } from "../../utils/createQrCode/checkIn"
 import { checkTransaction } from "../../utils/checkTransaction"
 
-const TestPage = () => {
+const QrCodePage = () => {
+  // Get the `id` parameter from the URL
   const router = useRouter()
   const { id } = router.query
-  const locationKey = locations.find((location) => location.id === id)?.key
-  console.log(locationKey?.toString(), "test page")
 
+  // Create a ref to the QR code element and a state variable for the reference
   const qrRef = useRef<HTMLDivElement>(null)
   const [reference, setReference] = useState(Keypair.generate().publicKey)
 
+  // Create the QR code when the `id` parameter or `reference` changes
   useEffect(() => {
-    createQRCode(qrRef, reference, locationKey!)
-  }, [reference, locationKey])
+    if (id) {
+      createQRCode(qrRef, reference, id as string)
+    }
+  }, [reference, id])
 
+  // Periodically check the transaction status and reset the `reference` state variable once confirmed
   useEffect(() => {
     const interval = setInterval(() => {
       checkTransaction(reference, setReference)
@@ -31,10 +34,10 @@ const TestPage = () => {
 
   return (
     <VStack justifyContent="center">
-      <Heading>Point {id}</Heading>
+      <Heading>Location {id}</Heading>
       <Flex ref={qrRef} />
     </VStack>
   )
 }
 
-export default TestPage
+export default QrCodePage

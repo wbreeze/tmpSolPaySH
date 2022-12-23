@@ -1,11 +1,4 @@
-import { utils } from "@project-serum/anchor"
-import {
-  createQR,
-  encodeURL,
-  findReference,
-  FindReferenceError,
-  TransactionRequestURLFields,
-} from "@solana/pay"
+import { findReference, FindReferenceError } from "@solana/pay"
 import { Keypair, PublicKey } from "@solana/web3.js"
 import { connection } from "./anchorSetup"
 
@@ -18,6 +11,7 @@ export const checkTransaction = async (
     await findReference(connection, reference, {
       finality: "confirmed",
     })
+
     // If a transaction is confirmed, generate a new reference and display an alert
     setReference(Keypair.generate().publicKey)
     window.alert("Transaction Confirmed")
@@ -27,6 +21,8 @@ export const checkTransaction = async (
       console.log(reference.toString(), "not confirmed")
       return
     }
+
+    // Log any other errors
     console.error("Unknown error", e)
   }
 }
