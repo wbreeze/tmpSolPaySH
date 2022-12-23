@@ -7,6 +7,7 @@ import {
   IconButton,
 } from "@chakra-ui/react"
 import { HamburgerIcon } from "@chakra-ui/icons"
+import { locations } from "../utils/locations"
 import Link from "next/link"
 const Navbar = () => {
   return (
@@ -21,12 +22,15 @@ const Navbar = () => {
           <MenuItem as={Link} href="/">
             Home
           </MenuItem>
-          <MenuItem as={Link} href="/pointOne">
-            Scavenger Hunt
-          </MenuItem>
-          <MenuItem as={Link} href="/pointTwo">
-            Mint Nft
-          </MenuItem>
+          {locations.map((location) => (
+            <MenuItem
+              as={Link}
+              // href="/scavenger-hunt/[id]"
+              href={`/point/${location.id}`}
+            >
+              Point {location.id}
+            </MenuItem>
+          ))}
         </MenuList>
       </Menu>
     </Flex>

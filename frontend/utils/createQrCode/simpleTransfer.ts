@@ -17,6 +17,8 @@ export const createQRCode = (
     location.host
   }/api/simpleTransfer?${params.toString()}`
 
+  console.log(apiUrl)
+
   const urlFields: TransactionRequestURLFields = {
     link: new URL(apiUrl),
   }

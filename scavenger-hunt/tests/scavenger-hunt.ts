@@ -1,7 +1,8 @@
 import * as anchor from "@project-serum/anchor"
 import { Program } from "@project-serum/anchor"
 import { findProgramAddressSync } from "@project-serum/anchor/dist/cjs/utils/pubkey"
-import { expect } from "chai"
+import { Keypair } from "@solana/web3.js"
+import { assert } from "chai"
 import { ScavengerHunt } from "../target/types/scavenger_hunt"
 const fs = require("fs")
 
@@ -30,28 +31,28 @@ describe("scavenger-hunt", () => {
   })
 
   it("Check In", async () => {
+    const location = Keypair.generate().publicKey
     // Add your test here.
     const tx = await program.methods
-      .checkIn()
+      .checkIn(location)
       .accounts({ eventOrganizer: eventOrganizer.publicKey })
       .signers([eventOrganizer])
       .rpc()
 
     const userState = await program.account.userState.fetch(userStatePDA)
-    expect(userState.lastPoint).to.equal(1)
-
-    await new Promise((resolve) => setTimeout(resolve, 1000))
+    assert.isTrue(userState.lastLocation.equals(location))
   })
 
-  it("Check In", async () => {
+  it("Check In Again", async () => {
+    const location = Keypair.generate().publicKey
     // Add your test here.
     const tx = await program.methods
-      .checkIn()
+      .checkIn(location)
       .accounts({ eventOrganizer: eventOrganizer.publicKey })
       .signers([eventOrganizer])
       .rpc()
 
     const userState = await program.account.userState.fetch(userStatePDA)
-    expect(userState.lastPoint).to.equal(2)
+    assert.isTrue(userState.lastLocation.equals(location))
   })
 })

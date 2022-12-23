@@ -11,13 +11,11 @@ pub mod scavenger_hunt {
 
     pub fn initialize(ctx: Context<Initialize>) -> Result<()> {
         ctx.accounts.user_state.user = ctx.accounts.user.key();
-        ctx.accounts.user_state.last_point = 0;
         Ok(())
     }
 
-    pub fn check_in(ctx: Context<CheckIn>) -> Result<()> {
-        ctx.accounts.user_state.last_point =
-            ctx.accounts.user_state.last_point.checked_add(1).unwrap();
+    pub fn check_in(ctx: Context<CheckIn>, location: Pubkey) -> Result<()> {
+        ctx.accounts.user_state.last_location = location;
         Ok(())
     }
 }
@@ -29,7 +27,7 @@ pub struct Initialize<'info> {
         seeds = [user.key().as_ref()],
         bump,
         payer = user,
-        space = 8 + 32 + 8
+        space = 8 + 32 + 32
 
     )]
     pub user_state: Account<'info, UserState>,
@@ -56,5 +54,5 @@ pub struct CheckIn<'info> {
 #[account]
 pub struct UserState {
     pub user: Pubkey,
-    pub last_point: u8,
+    pub last_location: Pubkey,
 }

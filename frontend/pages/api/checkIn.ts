@@ -2,9 +2,9 @@ import { ScavengerHunt } from "../../idl/scavenger_hunt"
 import { findProgramAddressSync } from "@project-serum/anchor/dist/cjs/utils/pubkey"
 import { NextApiRequest, NextApiResponse } from "next"
 import { Keypair, PublicKey, Transaction } from "@solana/web3.js"
-import { connection } from "../../utils/anchorSetup"
-import { program } from "../../utils/scavengerHuntProgram"
+import { connection, program } from "../../utils/anchorSetup"
 import { IdlAccounts } from "@project-serum/anchor"
+import { locations } from "../../utils/locations"
 
 type UserState = IdlAccounts<ScavengerHunt>["userState"]
 
@@ -67,10 +67,17 @@ async function post(
     return
   }
 
+  const { locationKey } = req.query
+  if (!locationKey) {
+    res.status(400).json({ error: "No locationKey provided" })
+    return
+  }
+
   try {
     const postResponse = await buildTransaction(
       new PublicKey(account),
-      new PublicKey(reference)
+      new PublicKey(reference),
+      new PublicKey(locationKey)
     )
     res.status(200).json(postResponse)
     return
@@ -83,7 +90,8 @@ async function post(
 // build the transaction
 async function buildTransaction(
   account: PublicKey,
-  reference: PublicKey
+  reference: PublicKey,
+  locationKey: PublicKey
 ): Promise<PostResponse> {
   let message: string
 
@@ -110,7 +118,7 @@ async function buildTransaction(
     .instruction()
 
   const checkInInstruction = await program.methods
-    .checkIn()
+    .checkIn(locationKey)
     .accounts({
       user: account,
       eventOrganizer: eventOrganizerKeypair.publicKey,
@@ -122,14 +130,31 @@ async function buildTransaction(
     program.programId
   )
 
+  const currentLocation = locations.find(
+    (location) => location.key.toString() === locationKey.toString()
+  )
+
+  // console.log(locations[0].key.toString(), "location 1")
+  // console.log(locations[1].key.toString(), "location 2")
+  // console.log(locations[2].key.toString(), "location 3")
+  // console.log(locationKey.toString(), "locationKey")
+  // console.log(currentLocation)
+
   let userState: UserState
   try {
     userState = await program.account.userState.fetch(userStatePDA)
-    console.log(userState.lastPoint)
-    if (userState.lastPoint != 0) {
-      return {
-        transaction: "",
-        message: "You've already been here! Find the next point",
+    console.log(userState.lastLocation.toString())
+    if (userState) {
+      const lastLocation = locations.find(
+        (location) =>
+          location.key.toString() === userState.lastLocation.toString()
+      )
+
+      if (Number(currentLocation?.id) != Number(lastLocation?.id) + 1) {
+        return {
+          transaction: "",
+          message: "You're at the wrong location, keep looking!",
+        }
       }
     }
   } catch (e) {
@@ -149,7 +174,7 @@ async function buildTransaction(
     requireAllSignatures: false,
   })
   const base64 = serializedTransaction.toString("base64")
-  message = "You are at point 1. Find the next point!"
+  message = `You've found location ${currentLocation?.id}!`
 
   return {
     transaction: base64,

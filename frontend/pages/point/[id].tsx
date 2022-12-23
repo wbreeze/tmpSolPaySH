@@ -1,16 +1,23 @@
 import { Flex, Heading, VStack } from "@chakra-ui/react"
+import { useRouter } from "next/router"
+import { locations } from "../../utils/locations"
 import { Keypair } from "@solana/web3.js"
 import { useEffect, useRef, useState } from "react"
-import { createQRCode } from "../../utils/createQrCode/pointOne"
+import { createQRCode } from "../../utils/createQrCode/checkIn"
 import { checkTransaction } from "../../utils/checkTransaction"
 
-const PointOne = () => {
+const TestPage = () => {
+  const router = useRouter()
+  const { id } = router.query
+  const locationKey = locations.find((location) => location.id === id)?.key
+  console.log(locationKey?.toString(), "test page")
+
   const qrRef = useRef<HTMLDivElement>(null)
   const [reference, setReference] = useState(Keypair.generate().publicKey)
 
   useEffect(() => {
-    createQRCode(qrRef, reference)
-  }, [reference])
+    createQRCode(qrRef, reference, locationKey!)
+  }, [reference, locationKey])
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -24,10 +31,10 @@ const PointOne = () => {
 
   return (
     <VStack justifyContent="center">
-      <Heading>Scavenger Hunt</Heading>
+      <Heading>Point {id}</Heading>
       <Flex ref={qrRef} />
     </VStack>
   )
 }
 
-export default PointOne
+export default TestPage
