@@ -114,7 +114,7 @@ async function buildTransaction(
   )!
 
   // Fetch the user state or add the `initialize` instruction if necessary
-  const userState = await fetchOrInitializeUserState(transaction, account)
+  const userState = await fetchOrInitializeUserState(account, transaction)
 
   // Verify that the user is at the correct location
   const errorMessage = verifyCorrectLocation(userState, currentLocation)
@@ -154,8 +154,8 @@ async function buildTransaction(
 }
 
 async function fetchOrInitializeUserState(
-  transaction: Transaction,
-  account: PublicKey
+  account: PublicKey,
+  transaction: Transaction
 ): Promise<UserState | undefined> {
   const [userStatePDA] = findProgramAddressSync(
     [account.toBuffer()],

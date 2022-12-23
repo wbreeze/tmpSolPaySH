@@ -1,4 +1,4 @@
-import { Flex, Heading, VStack } from "@chakra-ui/react"
+import { Box, Heading, VStack } from "@chakra-ui/react"
 import { Keypair } from "@solana/web3.js"
 import { useEffect, useRef, useState } from "react"
 import { createQRCode } from "../utils/createQrCode/simpleTransfer"
@@ -9,7 +9,7 @@ export default function Home() {
   const qrRef = useRef<HTMLDivElement>(null)
   const [reference, setReference] = useState(Keypair.generate().publicKey)
 
-  // Create the QR code when the `id` parameter or `reference` changes
+  // Create the QR code when the `reference` changes
   useEffect(() => {
     createQRCode(qrRef, reference)
   }, [reference])
@@ -28,7 +28,7 @@ export default function Home() {
   return (
     <VStack justifyContent="center">
       <Heading>SOL Transfer</Heading>
-      <Flex ref={qrRef} />
+      <Box ref={qrRef} />
     </VStack>
   )
 }
