@@ -63,21 +63,10 @@ async function post(
   res: NextApiResponse<PostResponse | PostError>
 ) {
   const { account } = req.body as InputData
-  const { reference } = req.query
-  const { id } = req.query
+  const { reference, id } = req.query
 
-  if (!account) {
-    res.status(400).json({ error: "No account provided" })
-    return
-  }
-
-  if (!reference) {
-    res.status(400).json({ error: "No reference provided" })
-    return
-  }
-
-  if (!id) {
-    res.status(400).json({ error: "No id provided" })
+  if (!account || !reference || !id) {
+    res.status(400).json({ error: "Missing required parameter(s)" })
     return
   }
 
@@ -157,15 +146,14 @@ async function buildTransaction(
 async function fetchOrInitializeUserState(
   account: PublicKey,
   transaction: Transaction
-): Promise<UserState | undefined> {
-  const [userStatePDA] = findProgramAddressSync(
+): Promise<UserState | void> {
+  const userStatePDA = findProgramAddressSync(
     [gameId.toBuffer(), account.toBuffer()],
     program.programId
-  )
+  )[0]
 
-  let userState: UserState | undefined
   try {
-    userState = await program.account.userState.fetch(userStatePDA)
+    return await program.account.userState.fetch(userStatePDA)
   } catch (e) {
     const initializeInstruction = await program.methods
       .initialize(gameId)
@@ -173,36 +161,37 @@ async function fetchOrInitializeUserState(
       .instruction()
     transaction.add(initializeInstruction)
   }
-
-  return userState
 }
 
 function verifyCorrectLocation(
-  userState: UserState | undefined,
+  userState: UserState | void,
   currentLocation: any
 ): PostResponse | undefined {
-  if (userState) {
-    // If user has checked in at a location, verify that they are checking in at the correct location
-    const lastLocation = locations.find(
-      (location) =>
-        location.key.toString() === userState!.lastLocation.toString()
-    )
-    if (lastLocation && currentLocation.id !== lastLocation.id + 1) {
-      return {
-        transaction: "",
-        message: "You're at the wrong location, keep looking!",
-      }
-    } else if (!lastLocation) {
-      return {
-        transaction: "",
-        message: "Unrecognized previous location, where did you go?",
-      }
+  if (!userState) {
+    if (currentLocation.id === 1) {
+      return
     }
-  } else if (currentLocation.id !== 1) {
-    // If the user has not checked in at a location and is not at the first location, return an error message
     return {
       transaction: "",
       message: "You missed the first location, go back!",
+    }
+  }
+
+  const lastLocation = locations.find(
+    (location) => location.key.toString() === userState.lastLocation.toString()
+  )
+
+  if (!lastLocation) {
+    return {
+      transaction: "",
+      message: "Unrecognized previous location, where did you go?",
+    }
+  }
+
+  if (currentLocation.id !== lastLocation.id + 1) {
+    return {
+      transaction: "",
+      message: "You're at the wrong location, keep looking!",
     }
   }
 }

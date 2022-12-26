@@ -8,16 +8,19 @@ export const createQRCode = (
   id: string
 ) => {
   // Build the API URL with the `reference` and `id` parameters
-  const params = new URLSearchParams()
-  params.append("reference", reference.toString())
-  params.append("id", id)
-  const apiUrl = `${location.protocol}//${
-    location.host
-  }/api/checkIn?${params.toString()}`
+  const searchParams = new URLSearchParams([
+    ["reference", reference.toString()],
+    ["id", id],
+  ])
+
+  const apiUrl = new URL(
+    `/api/checkIn?${searchParams.toString()}`,
+    location.origin
+  )
 
   // Encode the API URL into a QR code
   const urlFields: TransactionRequestURLFields = {
-    link: new URL(apiUrl),
+    link: apiUrl,
   }
   const url = encodeURL(urlFields)
   const qr = createQR(url, 400, "transparent")

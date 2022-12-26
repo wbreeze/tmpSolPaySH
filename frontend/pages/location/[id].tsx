@@ -40,6 +40,4 @@ const QrCodePage = () => {
   )
 }
 
-{
-}
 export default QrCodePage
