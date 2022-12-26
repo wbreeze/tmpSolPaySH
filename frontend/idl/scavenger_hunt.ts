@@ -19,6 +19,11 @@ export type ScavengerHunt = {
           "pda": {
             "seeds": [
               {
+                "kind": "arg",
+                "type": "publicKey",
+                "path": "game_id"
+              },
+              {
                 "kind": "account",
                 "type": "publicKey",
                 "path": "user"
@@ -42,7 +47,12 @@ export type ScavengerHunt = {
           "isSigner": false
         }
       ],
-      "args": []
+      "args": [
+        {
+          "name": "gameId",
+          "type": "publicKey"
+        }
+      ]
     },
     {
       "name": "checkIn",
@@ -53,6 +63,11 @@ export type ScavengerHunt = {
           "isSigner": false,
           "pda": {
             "seeds": [
+              {
+                "kind": "arg",
+                "type": "publicKey",
+                "path": "game_id"
+              },
               {
                 "kind": "account",
                 "type": "publicKey",
@@ -74,6 +89,10 @@ export type ScavengerHunt = {
       ],
       "args": [
         {
+          "name": "gameId",
+          "type": "publicKey"
+        },
+        {
           "name": "location",
           "type": "publicKey"
         }
@@ -88,6 +107,10 @@ export type ScavengerHunt = {
         "fields": [
           {
             "name": "user",
+            "type": "publicKey"
+          },
+          {
+            "name": "gameId",
             "type": "publicKey"
           },
           {
@@ -121,6 +144,11 @@ export const IDL: ScavengerHunt = {
           "pda": {
             "seeds": [
               {
+                "kind": "arg",
+                "type": "publicKey",
+                "path": "game_id"
+              },
+              {
                 "kind": "account",
                 "type": "publicKey",
                 "path": "user"
@@ -144,7 +172,12 @@ export const IDL: ScavengerHunt = {
           "isSigner": false
         }
       ],
-      "args": []
+      "args": [
+        {
+          "name": "gameId",
+          "type": "publicKey"
+        }
+      ]
     },
     {
       "name": "checkIn",
@@ -155,6 +188,11 @@ export const IDL: ScavengerHunt = {
           "isSigner": false,
           "pda": {
             "seeds": [
+              {
+                "kind": "arg",
+                "type": "publicKey",
+                "path": "game_id"
+              },
               {
                 "kind": "account",
                 "type": "publicKey",
@@ -176,6 +214,10 @@ export const IDL: ScavengerHunt = {
       ],
       "args": [
         {
+          "name": "gameId",
+          "type": "publicKey"
+        },
+        {
           "name": "location",
           "type": "publicKey"
         }
@@ -190,6 +232,10 @@ export const IDL: ScavengerHunt = {
         "fields": [
           {
             "name": "user",
+            "type": "publicKey"
+          },
+          {
+            "name": "gameId",
             "type": "publicKey"
           },
           {

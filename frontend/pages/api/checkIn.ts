@@ -6,6 +6,7 @@ import { connection, program } from "../../utils/anchorSetup"
 import { IdlAccounts } from "@project-serum/anchor"
 import { locations } from "../../utils/locations"
 
+const gameId = Keypair.generate().publicKey
 const eventOrganizer = JSON.parse(process.env.EVENT_ORGANIZER ?? "") as number[]
 if (!eventOrganizer) throw new Error("EVENT_ORGANIZER not found")
 const eventOrganizerKeypair = Keypair.fromSecretKey(
@@ -124,7 +125,7 @@ async function buildTransaction(
 
   // Check in at the current location
   const checkInInstruction = await program.methods
-    .checkIn(currentLocation.key)
+    .checkIn(gameId, currentLocation.key)
     .accounts({
       user: account,
       eventOrganizer: eventOrganizerKeypair.publicKey,
@@ -158,7 +159,7 @@ async function fetchOrInitializeUserState(
   transaction: Transaction
 ): Promise<UserState | undefined> {
   const [userStatePDA] = findProgramAddressSync(
-    [account.toBuffer()],
+    [gameId.toBuffer(), account.toBuffer()],
     program.programId
   )
 
@@ -167,7 +168,7 @@ async function fetchOrInitializeUserState(
     userState = await program.account.userState.fetch(userStatePDA)
   } catch (e) {
     const initializeInstruction = await program.methods
-      .initialize()
+      .initialize(gameId)
       .accounts({ user: account })
       .instruction()
     transaction.add(initializeInstruction)

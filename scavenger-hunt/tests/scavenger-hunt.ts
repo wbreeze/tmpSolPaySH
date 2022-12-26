@@ -20,21 +20,25 @@ describe("scavenger-hunt", () => {
     new Uint8Array(keyData)
   )
 
+  const gameId = Keypair.generate().publicKey
+
   const [userStatePDA] = findProgramAddressSync(
-    [provider.wallet.publicKey.toBuffer()],
+    [gameId.toBuffer(), provider.wallet.publicKey.toBuffer()],
     program.programId
   )
 
   it("Initialized", async () => {
     // Add your test here.
-    const tx = await program.methods.initialize().rpc()
+    const tx = await program.methods.initialize(gameId).rpc()
+
+    const userState = await program.account.userState.fetch(userStatePDA)
   })
 
   it("Check In", async () => {
     const location = Keypair.generate().publicKey
     // Add your test here.
     const tx = await program.methods
-      .checkIn(location)
+      .checkIn(gameId, location)
       .accounts({ eventOrganizer: eventOrganizer.publicKey })
       .signers([eventOrganizer])
       .rpc()
@@ -47,7 +51,7 @@ describe("scavenger-hunt", () => {
     const location = Keypair.generate().publicKey
     // Add your test here.
     const tx = await program.methods
-      .checkIn(location)
+      .checkIn(gameId, location)
       .accounts({ eventOrganizer: eventOrganizer.publicKey })
       .signers([eventOrganizer])
       .rpc()

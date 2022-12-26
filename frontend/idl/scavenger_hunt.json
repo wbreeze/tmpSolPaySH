@@ -19,6 +19,11 @@
           "pda": {
             "seeds": [
               {
+                "kind": "arg",
+                "type": "publicKey",
+                "path": "game_id"
+              },
+              {
                 "kind": "account",
                 "type": "publicKey",
                 "path": "user"
@@ -42,7 +47,12 @@
           "isSigner": false
         }
       ],
-      "args": []
+      "args": [
+        {
+          "name": "gameId",
+          "type": "publicKey"
+        }
+      ]
     },
     {
       "name": "checkIn",
@@ -53,6 +63,11 @@
           "isSigner": false,
           "pda": {
             "seeds": [
+              {
+                "kind": "arg",
+                "type": "publicKey",
+                "path": "game_id"
+              },
               {
                 "kind": "account",
                 "type": "publicKey",
@@ -74,6 +89,10 @@
       ],
       "args": [
         {
+          "name": "gameId",
+          "type": "publicKey"
+        },
+        {
           "name": "location",
           "type": "publicKey"
         }
@@ -88,6 +107,10 @@
         "fields": [
           {
             "name": "user",
+            "type": "publicKey"
+          },
+          {
+            "name": "gameId",
             "type": "publicKey"
           },
           {
