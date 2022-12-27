@@ -7,12 +7,13 @@ export const createQRCode = (
   reference: PublicKey,
   id: string
 ) => {
-  // Build the API URL with the `reference` and `id` parameters
+  // Create a new URLSearchParams object with the `reference` and `id` parameters
   const searchParams = new URLSearchParams([
     ["reference", reference.toString()],
     ["id", id],
   ])
 
+  // Create a new URL object using the current origin and the API URL with search parameters
   const apiUrl = new URL(
     `/api/checkIn?${searchParams.toString()}`,
     location.origin

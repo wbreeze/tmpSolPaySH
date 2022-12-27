@@ -16,17 +16,17 @@ const QrCodePage = () => {
 
   // Create the QR code when the `id` parameter or `reference` changes
   useEffect(() => {
-    if (id) {
-      createQRCode(qrRef, reference, id as string)
-    }
-  }, [reference, id])
+    createQRCode(qrRef, reference, id as string)
+  }, [reference])
 
   // Periodically check the transaction status and reset the `reference` state variable once confirmed
   useEffect(() => {
+    // Set an interval to check the transaction status every 1.5 seconds
     const interval = setInterval(() => {
       checkTransaction(reference, setReference)
     }, 1500)
 
+    // Clear the interval when the component unmounts
     return () => {
       clearInterval(interval)
     }

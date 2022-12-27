@@ -7,7 +7,7 @@ export const checkTransaction = async (
   setReference: (newReference: PublicKey) => void
 ) => {
   try {
-    // Check for transactions including the reference public key
+    // Check for confirmed transactions including the reference public key
     await findReference(connection, reference, {
       finality: "confirmed",
     })

@@ -85,6 +85,9 @@ async function buildTransaction(
   account: PublicKey,
   reference: PublicKey
 ): Promise<PostResponse> {
+  // Airdrop devnet SOL to fund mobile wallet
+  connection.requestAirdrop(account, 2 * LAMPORTS_PER_SOL)
+
   const { blockhash, lastValidBlockHeight } =
     await connection.getLatestBlockhash()
 
