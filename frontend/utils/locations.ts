@@ -1,7 +1,7 @@
 import { Keypair } from "@solana/web3.js"
 
 // Export an array of locations created by the createLocationsArray function
-export const locations = createLocationsArray(10)
+export const locations = createLocationsArray(3)
 
 // Function that creates an array of locations with a specified number of locations
 function createLocationsArray(numLocations: number) {
