@@ -8,14 +8,8 @@ import NodeWallet from "@project-serum/anchor/dist/cjs/nodewallet"
 import { clusterApiUrl, Connection, Keypair, PublicKey } from "@solana/web3.js"
 import { IDL, ScavengerHunt } from "../idl/scavenger_hunt"
 
+// Create a placeholder wallet to set up AnchorProvider
 let wallet = new NodeWallet(Keypair.generate())
-
-// Create a mock wallet object as placeholder to set up AnchorProvider
-const MockWallet = {
-  signTransaction: () => Promise.reject(),
-  signAllTransactions: () => Promise.reject(),
-  publicKey: Keypair.generate().publicKey,
-}
 
 // Create a connection to the devnet cluster
 export const connection = new Connection(clusterApiUrl("devnet"))
