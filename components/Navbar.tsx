@@ -21,7 +21,7 @@ const Navbar = () => {
         />
         <MenuList>
           <MenuItem as={Link} href="/">
-            Home
+            SOL Transfer
           </MenuItem>
           {locations.map((location) => (
             <MenuItem

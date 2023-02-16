@@ -1,10 +1,10 @@
-import { Box, Heading, VStack } from "@chakra-ui/react"
+import { Box, Heading, VStack, Container } from "@chakra-ui/react"
 import { Keypair } from "@solana/web3.js"
 import { useEffect, useRef, useState } from "react"
 import { createQRCode } from "../utils/createQrCode/simpleTransfer"
 import { checkTransaction } from "../utils/checkTransaction"
 
-export default function Home() {
+export default function SimpleTransferQrCodePage() {
   // Create a ref to the QR code element and a state variable for the reference
   const qrRef = useRef<HTMLDivElement>(null)
   const [reference, setReference] = useState(Keypair.generate().publicKey)
@@ -29,6 +29,12 @@ export default function Home() {
     <VStack justifyContent="center">
       <Heading>SOL Transfer</Heading>
       <Box ref={qrRef} />
+      <Container>
+        This simply transfers 0.001 Devnet SOL from your wallet to a randomly
+        generated wallet. Since most people don't have Devnet SOL in their
+        wallet, we've also set it up to automatically airdrop you 2 SOL on
+        Devnet to make it easier to test :)
+      </Container>
     </VStack>
   )
 }

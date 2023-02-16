@@ -8,29 +8,10 @@ import {
 } from "@solana/web3.js"
 import { connection } from "../../utils/anchorSetup"
 
-// Public key of wallet scanning QR code
-type InputData = {
-  account: string
-}
-
-type GetResponse = {
-  label: string
-  icon: string
-}
-
-export type PostResponse = {
-  transaction: string
-  message: string
-}
-
-export type PostError = {
-  error: string
-}
-
 // API endpoint
 export default async function handler(
   req: NextApiRequest,
-  res: NextApiResponse<GetResponse | PostResponse | PostError>
+  res: NextApiResponse
 ) {
   if (req.method === "GET") {
     return get(res)
@@ -42,7 +23,7 @@ export default async function handler(
 }
 
 // "res" is Text and Image that displays when wallet first scans
-function get(res: NextApiResponse<GetResponse>) {
+function get(res: NextApiResponse) {
   res.status(200).json({
     label: "Store Name",
     icon: "https://solana.com/src/img/branding/solanaLogoMark.svg",
@@ -51,11 +32,8 @@ function get(res: NextApiResponse<GetResponse>) {
 
 // "req" is public key of wallet scanning QR code
 // "res" is transaction built for wallet to approve, along with a message
-async function post(
-  req: NextApiRequest,
-  res: NextApiResponse<PostResponse | PostError>
-) {
-  const { account } = req.body as InputData
+async function post(req: NextApiRequest, res: NextApiResponse) {
+  const { account } = req.body
   if (!account) {
     res.status(400).json({ error: "No account provided" })
     return
@@ -68,58 +46,46 @@ async function post(
   }
 
   try {
-    const postResponse = await buildTransaction(
-      new PublicKey(account),
-      new PublicKey(reference)
-    )
-    res.status(200).json(postResponse)
+    const accountKey = new PublicKey(account)
+    const referenceKey = new PublicKey(reference)
+
+    // Airdrop devnet SOL to fund mobile wallet
+    connection.requestAirdrop(accountKey, 2 * LAMPORTS_PER_SOL)
+
+    const { blockhash, lastValidBlockHeight } =
+      await connection.getLatestBlockhash()
+
+    const transaction = new Transaction({
+      feePayer: accountKey,
+      blockhash,
+      lastValidBlockHeight,
+    })
+
+    const instruction = SystemProgram.transfer({
+      fromPubkey: accountKey,
+      toPubkey: Keypair.generate().publicKey,
+      lamports: 0.001 * LAMPORTS_PER_SOL,
+    })
+
+    instruction.keys.push({
+      pubkey: referenceKey,
+      isSigner: false,
+      isWritable: false,
+    })
+
+    transaction.add(instruction)
+
+    const serializedTransaction = transaction.serialize({
+      requireAllSignatures: false,
+    })
+    const base64 = serializedTransaction.toString("base64")
+
+    const message = "Approve to transfer 0.001 Devnet SOL"
+
+    res.status(200).json({ transaction: base64, message })
     return
   } catch (error) {
     res.status(500).json({ error: "error creating transaction" })
     return
-  }
-}
-
-// build the transaction
-async function buildTransaction(
-  account: PublicKey,
-  reference: PublicKey
-): Promise<PostResponse> {
-  // Airdrop devnet SOL to fund mobile wallet
-  connection.requestAirdrop(account, 2 * LAMPORTS_PER_SOL)
-
-  const { blockhash, lastValidBlockHeight } =
-    await connection.getLatestBlockhash()
-
-  const transaction = new Transaction({
-    feePayer: account,
-    blockhash,
-    lastValidBlockHeight,
-  })
-
-  const instruction = SystemProgram.transfer({
-    fromPubkey: account,
-    toPubkey: Keypair.generate().publicKey,
-    lamports: 0.001 * LAMPORTS_PER_SOL,
-  })
-
-  instruction.keys.push({
-    pubkey: reference,
-    isSigner: false,
-    isWritable: false,
-  })
-
-  transaction.add(instruction)
-
-  const serializedTransaction = transaction.serialize({
-    requireAllSignatures: false,
-  })
-  const base64 = serializedTransaction.toString("base64")
-
-  const message = "Approve to transfer 0.001 Devnet SOL"
-
-  return {
-    transaction: base64,
-    message,
   }
 }
