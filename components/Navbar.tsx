@@ -26,10 +26,10 @@ const Navbar = () => {
           {locations.map((location) => (
             <MenuItem
               as={Link}
-              href={`/location/${location.id}`}
-              key={location.id}
+              href={`/location/${location.index}`}
+              key={location.index}
             >
-              Location {location.id}
+              Location {location.index}
             </MenuItem>
           ))}
         </MenuList>
