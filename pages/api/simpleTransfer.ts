@@ -6,7 +6,7 @@ import {
   SystemProgram,
   Transaction,
 } from "@solana/web3.js"
-import { connection } from "../../utils/anchorSetup"
+import { connection } from "../../utils/programSetup"
 
 // API endpoint
 export default async function handler(

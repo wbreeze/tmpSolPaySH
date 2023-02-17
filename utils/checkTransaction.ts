@@ -1,6 +1,6 @@
 import { findReference, FindReferenceError } from "@solana/pay"
 import { Keypair, PublicKey } from "@solana/web3.js"
-import { connection } from "./anchorSetup"
+import { connection } from "./programSetup"
 
 export const checkTransaction = async (
   reference: PublicKey,
