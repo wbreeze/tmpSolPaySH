@@ -27,16 +27,3 @@ export const program = new Program(
   IDL as Idl,
   programId
 ) as unknown as Program<ScavengerHunt>
-
-export const gameId = Keypair.generate().publicKey
-
-export const eventOrganizer = getEventOrganizer()
-
-function getEventOrganizer() {
-  const eventOrganizer = JSON.parse(
-    process.env.EVENT_ORGANIZER ?? ""
-  ) as number[]
-  if (!eventOrganizer) throw new Error("EVENT_ORGANIZER not found")
-
-  return Keypair.fromSecretKey(Uint8Array.from(eventOrganizer))
-}
