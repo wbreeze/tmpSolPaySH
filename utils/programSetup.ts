@@ -27,3 +27,5 @@ export const program = new Program(
   IDL as Idl,
   programId
 ) as unknown as Program<ScavengerHunt>
+
+export const gameId = Keypair.generate().publicKey
