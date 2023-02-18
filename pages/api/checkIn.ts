@@ -63,7 +63,7 @@ async function post(req: NextApiRequest, res: NextApiResponse) {
     console.log(err)
     let error = err as any
     if (error.message) {
-      res.status(400).json({ error: error.message })
+      res.status(200).json({ transaction: "", message: error.message })
     } else {
       res.status(500).json({ error: "error creating transaction" })
     }
