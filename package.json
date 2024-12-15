@@ -25,6 +25,7 @@
     "eslint-config-next": "13.0.7",
     "framer-motion": "^6",
     "fs": "^0.0.1-security",
+    "localtunnel": "^2.0.2",
     "next": "13.0.7",
     "react": "18.2.0",
     "react-dom": "18.2.0",
