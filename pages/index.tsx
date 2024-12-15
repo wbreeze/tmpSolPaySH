@@ -31,8 +31,8 @@ export default function SimpleTransferQrCodePage() {
       <Box ref={qrRef} />
       <Container>
         This simply transfers 0.001 Devnet SOL from your wallet to a randomly
-        generated wallet. Since most people don't have Devnet SOL in their
-        wallet, we've also set it up to automatically airdrop you 2 SOL on
+        generated wallet. Since most people don&apos;t have Devnet SOL in their
+        wallet, we&apos;ve also set it up to automatically airdrop you 2 SOL on
         Devnet to make it easier to test :)
       </Container>
     </VStack>

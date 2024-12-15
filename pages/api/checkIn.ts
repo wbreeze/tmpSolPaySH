@@ -28,7 +28,7 @@ export default async function handler(
   } else if (req.method === "POST") {
     return await post(req, res)
   } else {
-    return res.status(405).json({ error: "Method not allowed" })
+    return res.status(405).json({ error: "Method does not compute" })
   }
 }
 
@@ -44,7 +44,7 @@ async function post(req: NextApiRequest, res: NextApiResponse) {
   const { reference, id } = req.query
 
   if (!account || !reference || !id) {
-    res.status(400).json({ error: "Missing required parameter(s)" })
+    res.status(400).json({ error: "Request has missing parts" })
     return
   }
 
@@ -65,7 +65,7 @@ async function post(req: NextApiRequest, res: NextApiResponse) {
     if (error.message) {
       res.status(200).json({ transaction: "", message: error.message })
     } else {
-      res.status(500).json({ error: "error creating transaction" })
+      res.status(500).json({ error: "Transaction fell apart" })
     }
   }
 }
@@ -80,11 +80,11 @@ async function buildTransaction(
   const currentLocation = locationAtIndex(new Number(id).valueOf())
 
   if (!currentLocation) {
-    throw { message: "Invalid location id" }
+    throw { message: "This location is in someone else's movie." }
   }
 
   if (!verifyCorrectLocation(userState, currentLocation)) {
-    throw { message: "You must visit each location in order!" }
+    throw { message: "Uh oh, scavenger. You missed a spot." }
   }
 
   const { blockhash, lastValidBlockHeight } =

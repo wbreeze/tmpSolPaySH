@@ -1,6 +1,6 @@
 import { Keypair, PublicKey } from "@solana/web3.js"
 
-interface Location {
+export interface Location {
   index: number
   key: PublicKey
 }
