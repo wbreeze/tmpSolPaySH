@@ -13,7 +13,7 @@
     "@chakra-ui/react": "^2.4.4",
     "@emotion/react": "^11",
     "@emotion/styled": "^11",
-    "@metaplex-foundation/js": "^0.17.12",
+    "@metaplex-foundation/js": "^0.19.5",
     "@next/font": "13.0.7",
     "@project-serum/anchor": "^0.26.0",
     "@solana/pay": "^0.2.4",
@@ -25,8 +25,7 @@
     "eslint-config-next": "13.0.7",
     "framer-motion": "^6",
     "fs": "^0.0.1-security",
-    "localtunnel": "^2.0.2",
-    "next": "13.0.7",
+    "next": "^15.1.2",
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "typescript": "4.9.4"
